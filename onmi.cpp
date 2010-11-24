@@ -87,7 +87,7 @@ Grouping fileToSet(const char * file) {
 	forEach(const std::string &line, amd::rangeOverStream(f)) {
 		Grouping::value_type s;
 		istringstream fields(line);
-		forEach(const std::string &field, amd::rangeOverStream(fields, "\t")) {
+		forEach(const std::string &field, amd::rangeOverStream(fields, "\t ")) {
 			if(field.length() == 0) {
 				cerr << "Warning: two consecutive tabs, or tab at the start of a line. Ignoring empty fields like this" << endl;
 			} else {
