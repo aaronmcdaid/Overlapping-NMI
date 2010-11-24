@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <set>
+#include <boost/unordered_map.hpp>
 
 
 #include "aaron_utils.hpp"
@@ -74,7 +75,9 @@ int main(int argc, char ** argv) {
 	oNMI(file1, file2);
 }
 
-typedef std::vector< std::set< std::string > > Grouping;
+typedef std::string Node;
+typedef std::vector< std::set< Node > > Grouping;
+typedef boost::unordered_map< Node, set<int> > NodeToGroup;
 
 Grouping fileToSet(const char * file) {
 	Grouping ss;
@@ -95,10 +98,24 @@ Grouping fileToSet(const char * file) {
 	}
 	return ss;
 }
+NodeToGroup nodeToGroup(const Grouping &g) {
+	NodeToGroup n2g;
+	for(int grpId = 0; grpId < (int)g.size(); grpId++) {
+		const Grouping::value_type &grp = g.at(grpId);
+		forEach(const Node &n, amd::mk_range(grp)) {
+			n2g[n].insert(grpId);
+		}
+	}
+	return n2g;
+}
 
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
 	PP(g1.size());
 	PP(g2.size());
+	NodeToGroup n2g1 = nodeToGroup(g1);
+	NodeToGroup n2g2 = nodeToGroup(g2);
+	PP(n2g1.size());
+	PP(n2g2.size());
 }
