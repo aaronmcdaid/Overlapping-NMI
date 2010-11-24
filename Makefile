@@ -39,4 +39,4 @@ gitstatus.txt:
 	{ git log | head -n 1 ; git status ; } | head -n 10 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt
 gitstatus.o: comment.txt  gitstatus.txt
 
-cut: Range.o cut.o gitstatus.o
+onmi: gitstatus.o Range.o onmi.o

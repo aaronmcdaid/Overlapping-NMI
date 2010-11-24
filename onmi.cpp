@@ -2,8 +2,10 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <exception>
 
 #include <vector>
+#include <set>
 
 
 #include "aaron_utils.hpp"
@@ -11,6 +13,7 @@
 #include "gitstatus.hpp"
 
 
+#define DEBUGBYDEFAULT
 
 
 using namespace std;
@@ -35,12 +38,21 @@ struct UsageMessage { };
 struct BadlyFormedArg_o {};
 struct MissingFile {};
 
+void oNMI(const char * file1, const char * file2);
+
 int main(int argc, char ** argv) {
 	std::locale system_locale("");
 	std::cout.imbue(system_locale); // to get comma-separated integers.
-	PP(gitstatus);
-	for (int i=0; i<argc; i++) {
-		PP(argv[i]);
+#ifdef DEBUGBYDEFAULT
+	if(1)
+#else
+	if(getenv("DEBUG"))
+#endif
+	{
+		PP(gitstatus);
+		for (int i=0; i<argc; i++) {
+			PP(argv[i]);
+		}
 	}
 	typedef 	pair< arg_o,
 			pair< arg_d,
@@ -54,10 +66,39 @@ int main(int argc, char ** argv) {
 
 	// cout << "-d arg is '" << f2.get_<arg_d>("\t") << "'" << endl;
 	// cout << "-f arg is '" << f2.get_<arg_o>("1-") << "'" << endl;
-	if(argc - optind == 0) {
-		throw UsageMessage();
-	} else {
+	if(argc - optind != 2) {
 		throw UsageMessage();
 	}
+	const char *file1 = argv[optind];
+	const char *file2 = argv[optind+1];
+	oNMI(file1, file2);
+}
 
+typedef std::vector< std::set< std::string > > Grouping;
+
+Grouping fileToSet(const char * file) {
+	Grouping ss;
+	std::ifstream f(file);
+	unless(f.is_open())
+		throw  MissingFile();
+	forEach(const std::string &line, amd::rangeOverStream(f)) {
+		Grouping::value_type s;
+		istringstream fields(line);
+		forEach(const std::string &field, amd::rangeOverStream(fields, "\t")) {
+			if(field.length() == 0) {
+				cerr << "Warning: two consecutive tabs, or tab at the start of a line. Ignoring empty fields like this" << endl;
+			} else {
+				s.insert(field);
+			}
+		}
+		ss.push_back(s);
+	}
+	return ss;
+}
+
+void oNMI(const char * file1, const char * file2) {
+	Grouping g1 = fileToSet(file1);
+	Grouping g2 = fileToSet(file2);
+	PP(g1.size());
+	PP(g2.size());
 }
