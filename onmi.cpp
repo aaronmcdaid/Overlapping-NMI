@@ -7,6 +7,7 @@
 #include <vector>
 #include <set>
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 
 #include "aaron_utils.hpp"
@@ -78,6 +79,7 @@ int main(int argc, char ** argv) {
 typedef std::string Node;
 typedef std::vector< std::set< Node > > Grouping;
 typedef boost::unordered_map< Node, set<int> > NodeToGroup;
+typedef boost::unordered_map< pair<int,int> , int> OverlapMatrix; // the pair is an ordered pair. It's the overlap from the "ground truth" community to the "found" community.
 
 Grouping fileToSet(const char * file) {
 	Grouping ss;
@@ -109,6 +111,26 @@ NodeToGroup nodeToGroup(const Grouping &g) {
 	return n2g;
 }
 
+
+OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2) {
+	OverlapMatrix om;
+	boost::unordered_set< Node > nodes;
+	forEach(const NodeToGroup::value_type &n, amd::mk_range(ng2)) {
+		nodes.insert(n.first);
+	}
+	forEach(const NodeToGroup::value_type &n, amd::mk_range(ng1)) {
+		nodes.insert(n.first);
+	}
+	forEach(const Node &n, amd::mk_range(nodes)) {
+		if(ng1.count(n)) forEach(const int g1, amd::mk_range(ng1.at(n))) {
+			if(ng2.count(n)) forEach(const int g2, amd::mk_range(ng2.at(n))) {
+				om[make_pair(g1,g2)] ++;
+			}
+		}
+	}
+	return om;
+}
+
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
@@ -118,4 +140,9 @@ void oNMI(const char * file1, const char * file2) {
 	NodeToGroup n2g2 = nodeToGroup(g2);
 	PP(n2g1.size());
 	PP(n2g2.size());
+	OverlapMatrix om = overlapMatrix(n2g1, n2g2);
+	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om)) {
+		PP2(o.first.first, o.first.second);
+		PP(o.second);
+	}
 }
