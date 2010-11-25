@@ -39,6 +39,7 @@ template <       > struct Flag<arg_d> : public RequiredArg, StringArgument, Flag
 struct UsageMessage { };
 struct BadlyFormedArg_o {};
 struct MissingFile {};
+struct EmptyFile {};
 
 void oNMI(const char * file1, const char * file2);
 
@@ -205,6 +206,8 @@ void oNMI(const char * file1, const char * file2) {
 	Grouping g2 = fileToSet(file2);
 	PP(g1.size());
 	PP(g2.size());
+	unless(g1.size() > 0) throw EmptyFile();
+	unless(g2.size() > 0) throw EmptyFile();
 	NodeToGroup n2g1 = nodeToGroup(g1);
 	NodeToGroup n2g2 = nodeToGroup(g2);
 	PP(n2g1.size());
