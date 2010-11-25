@@ -1,2 +1,2 @@
-"Comment: H_XgivenY for one pair"
+"Comment: H_XgivenY for one comm to a *set* of comms"
 "\n"

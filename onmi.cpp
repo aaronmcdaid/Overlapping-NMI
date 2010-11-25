@@ -177,6 +177,29 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 		return H_XY - H_Y;
 }
 
+template <bool flip>
+double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2, const int realxId) {
+	const int sizeOfXComm = g2.at(realxId).size();
+	double bestSoFar = H(sizeOfXComm,om.N) + H(om.N-sizeOfXComm,om.N);
+	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
+		int yId = o.first.first;
+		int xId   = o.first.second;
+		if(flip)
+			swap(yId, xId);
+		if(realxId == xId) {
+			const int overlap = o.second;
+			const double H_XgivenY = H_X_given_Y(g1.at(yId).size(),g2.at(xId).size(), overlap, om.N);
+			if(bestSoFar > H_XgivenY)
+				bestSoFar = H_XgivenY;
+			// cout << '\t'; PPt(g1.at(fromId).size());
+			// PPt(g2.at(xId).size());
+			// PPt(overlap);
+			// PP(H_XgivenY);
+		}
+	}
+	return bestSoFar;
+}
+
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
@@ -196,5 +219,11 @@ void oNMI(const char * file1, const char * file2) {
 		const double H_XgivenY = H_X_given_Y(g1.at(fromId).size(),g2.at(toId).size(), overlap, om.N);
 		assert(H_XgivenY >= 0.0);
 		PP(H_XgivenY);
+	}
+	for(int toId = 0; toId < (int)g2.size(); toId++) {
+		PP(HX_given_BestY<false>(om, g1, g2, toId));
+	}
+	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
+		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
 }
