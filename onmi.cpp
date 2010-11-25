@@ -138,6 +138,39 @@ const OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2
 	return om;
 }
 
+double H(const int x, const int N) {
+	if(x==0)
+		return 0.0;
+	const double Px = double(x) / double(N);
+	assert(x>0 && Px > 0.0);
+	return -x * log2(Px);
+}
+double H_X_given_Y (const int y, const int x, const int o, const int N) {
+	// the NON-NORMALIZED mutual information
+	// given sets of size 'l' and 'r', where there are 'o' nodes in common, what's their similarity score?
+		assert(o>0 && y>=o && x>=o && y*2 <= N && x*2 <= N); // shouldn't have a group over half the size. TODO
+		const double H_Y = H(y,N) + H(N-y,N);
+
+		const double Px0y0 = (N-x-y+o)  /double(N);
+		const double Px1y0 = (x-o)      /double(N);
+		const double Px0y1 = (y-o)      /double(N);
+		const double Px1y1 =  o         /double(N);
+		DYINGWORDS(VERYCLOSE(Px0y0 + Px0y1 + Px1y0 + Px1y1, 1.0)) {
+			PP(Px0y0);
+			PP(Px1y0);
+			PP(Px0y1);
+			PP(Px1y1);
+			PP(Px0y0 + Px0y1 + Px1y0 + Px1y1 - 1.0);
+		}
+		const double H_XY =
+			  H(N-x-y+o, N)
+			+ H(x-o, N)
+			+ H(y-o, N)
+			+ H(o, N)
+			;
+		return H_XY - H_Y;
+}
+
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
@@ -149,7 +182,13 @@ void oNMI(const char * file1, const char * file2) {
 	PP(n2g2.size());
 	const OverlapMatrix om = overlapMatrix(n2g1, n2g2);
 	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
-		PP2(o.first.first, o.first.second);
-		PP(o.second);
+		const int fromId = o.first.first;
+		const int   toId = o.first.second;
+		const int overlap = o.second;
+		// PP2(fromId, toId);
+		// PP(overlap);
+		const double H_XgivenY = H_X_given_Y(g1.at(fromId).size(),g2.at(toId).size(), overlap, om.N);
+		assert(H_XgivenY >= 0.0);
+		PP(H_XgivenY);
 	}
 }
