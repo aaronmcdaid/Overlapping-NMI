@@ -156,7 +156,7 @@ double h (const double p) {
 double H_X_given_Y (const int y, const int x, const int o, const int N) {
 	// the NON-NORMALIZED mutual information
 	// given sets of size 'l' and 'r', where there are 'o' nodes in common, what's their similarity score?
-		assert(o>0 && y>=o && x>=o && y*2 <= N && x*2 <= N); // shouldn't have a group over half the size. TODO
+		assert(o>0 && y>=o && x>=o && y   <= N && x   <= N);
 		const double H_Y = H(y,N) + H(N-y,N);
 		const double H_X = H(x,N) + H(N-x,N); // just used in the assertion
 
