@@ -150,8 +150,9 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 	// given sets of size 'l' and 'r', where there are 'o' nodes in common, what's their similarity score?
 		assert(o>0 && y>=o && x>=o && y*2 <= N && x*2 <= N); // shouldn't have a group over half the size. TODO
 		const double H_Y = H(y,N) + H(N-y,N);
+		const double H_X = H(x,N) + H(N-x,N); // just used in the assertion
 
-		const double Px0y0 = (N-x-y+o)  /double(N);
+		const double Px0y0 = (N-x-y+o)  /double(N); // TODO delete these, and following, lines
 		const double Px1y0 = (x-o)      /double(N);
 		const double Px0y1 = (y-o)      /double(N);
 		const double Px1y1 =  o         /double(N);
@@ -168,6 +169,11 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 			+ H(y-o, N)
 			+ H(o, N)
 			;
+		DYINGWORDS(H_X >= H_XY - H_Y) {
+			PP(H_X);
+			PP(H_XY - H_Y);
+			PP(H_X - (H_XY - H_Y));
+		}
 		return H_XY - H_Y;
 }
 
