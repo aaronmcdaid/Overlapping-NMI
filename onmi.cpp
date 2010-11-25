@@ -100,10 +100,11 @@ Grouping fileToSet(const char * file) {
 				s.insert(field);
 			}
 		}
-		if(s.size()==0)
+		if(s.size()==0) {
 			cerr << "Warning: ignoring empty sets in file: " << file << endl;
-		else
+		} else {
 			ss.push_back(s);
+		}
 	}
 	return ss;
 }
@@ -264,5 +265,6 @@ void oNMI(const char * file1, const char * file2) {
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
 		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
-	PP(LFKNMI(om, g1, g2));
+	const double LFKnmi = LFKNMI(om, g1, g2);
+	cout << "         "; PP(LFKnmi);
 }
