@@ -215,26 +215,49 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 	return bestSoFar;
 }
 
-template<bool flip>
-double LFKNMI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+template<bool flip, bool normalizeTooSoon>
+double NMI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
 	const int N = om.N;
 	double total = 0.0;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
 		const double unnorm = HX_given_BestY<flip>(om, g1, g2, toId);
-		const double x = g2.at(toId).size();
-		const double H_X = H(x,N) + H(N-x,N);
-		const double norm = unnorm / H_X;
-		assert(norm <= 1.0);
-		assert(norm >= 0.0);
-		total += norm;
+		if(normalizeTooSoon) {
+			const double x = g2.at(toId).size();
+			const double H_X = H(x,N) + H(N-x,N);
+			const double norm = unnorm / H_X;
+			assert(norm <= 1.0);
+			assert(norm >= 0.0);
+			total += norm;
+		} else
+			total += unnorm;
 	}
-	PP(total / g2.size());
-	return total / g2.size();
+	// PP(total / g2.size());
+	if(normalizeTooSoon)
+		return total / g2.size();
+	else
+		return total;
 }
 double LFKNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
 	return 1.0 - 0.5 *
-		( LFKNMI_oneSide<false>(om, g1, g2)
-		+ LFKNMI_oneSide<true >(om, g2, g1) );
+		( NMI_oneSide<false, true>(om, g1, g2)
+		+ NMI_oneSide<true , true>(om, g2, g1) );
+}
+double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+	double H_Xs = 0.0;
+	for(int toId = 0; toId < (int)g2.size(); toId++) {
+		const int x = g2.at(toId).size();
+		H_Xs += H(x, om.N)+H(om.N-x, om.N);
+	}
+	double H_Ys = 0.0;
+	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
+		const int x = g1.at(fromId).size();
+		H_Ys += H(x, om.N)+H(om.N-x, om.N);
+	}
+	return 1.0 - 
+		( NMI_oneSide<false, false>(om, g1, g2)
+		+ NMI_oneSide<true , false>(om, g2, g1) )
+		/ (H_Xs + H_Ys)
+		;
 }
 
 void oNMI(const char * file1, const char * file2) {
@@ -249,22 +272,15 @@ void oNMI(const char * file1, const char * file2) {
 	PP(n2g1.size());
 	PP(n2g2.size());
 	const OverlapMatrix om = overlapMatrix(n2g1, n2g2);
-	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
-		const int fromId = o.first.first;
-		const int   toId = o.first.second;
-		const int overlap = o.second;
-		// PP2(fromId, toId);
-		// PP(overlap);
-		const double H_XgivenY = H_X_given_Y(g1.at(fromId).size(),g2.at(toId).size(), overlap, om.N);
-		assert(H_XgivenY >= 0.0);
-		PP(H_XgivenY);
-	}
+	cout << "  \'" << file2 << "\' given \'" << file1 << "\"" << endl;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
 		PP(HX_given_BestY<false>(om, g1, g2, toId));
 	}
+	cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
 		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
+	PP(aaronNMI(om, g1, g2));
 	const double LFKnmi = LFKNMI(om, g1, g2);
 	cout << "         "; PP(LFKnmi);
 }
