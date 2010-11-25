@@ -146,6 +146,12 @@ double H(const int x, const int N) {
 	assert(x>0 && Px > 0.0);
 	return -x * log2(Px);
 }
+double h (const double p) {
+	if(p==0)
+		return 0;
+	assert(p>0);
+	return -p*log2(p);
+}
 double H_X_given_Y (const int y, const int x, const int o, const int N) {
 	// the NON-NORMALIZED mutual information
 	// given sets of size 'l' and 'r', where there are 'o' nodes in common, what's their similarity score?
@@ -164,6 +170,13 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 			PP(Px1y1);
 			PP(Px0y0 + Px0y1 + Px1y0 + Px1y1 - 1.0);
 		}
+		// PP(h(Px0y0));
+		// PP(h(Px1y1));
+		// PP(h(Px0y1));
+		// PP(h(Px1y0));
+		// PP( h(Px0y0)+h(Px1y1) -h(Px0y1)-h(Px0y1) );
+		if( h(Px0y0)+h(Px1y1) <= h(Px0y1)+h(Px1y0) )
+			return H_X;
 		const double H_XY =
 			  H(N-x-y+o, N)
 			+ H(x-o, N)
