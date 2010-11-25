@@ -96,7 +96,10 @@ Grouping fileToSet(const char * file) {
 				s.insert(field);
 			}
 		}
-		ss.push_back(s);
+		if(s.size()==0)
+			cerr << "Warning: ignoring empty sets in file: " << file << endl;
+		else
+			ss.push_back(s);
 	}
 	return ss;
 }
