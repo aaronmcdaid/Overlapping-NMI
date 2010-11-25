@@ -201,6 +201,28 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 	return bestSoFar;
 }
 
+template<bool flip>
+double LFKNMI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+	const int N = om.N;
+	double total = 0.0;
+	for(int toId = 0; toId < (int)g2.size(); toId++) {
+		const double unnorm = HX_given_BestY<flip>(om, g1, g2, toId);
+		const double x = g2.at(toId).size();
+		const double H_X = H(x,N) + H(N-x,N);
+		const double norm = unnorm / H_X;
+		assert(norm <= 1.0);
+		assert(norm >= 0.0);
+		total += norm;
+	}
+	PP(total / g2.size());
+	return total / g2.size();
+}
+double LFKNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+	return 1.0 - 0.5 *
+		( LFKNMI_oneSide<false>(om, g1, g2)
+		+ LFKNMI_oneSide<true >(om, g2, g1) );
+}
+
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
@@ -229,4 +251,5 @@ void oNMI(const char * file1, const char * file2) {
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
 		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
+	PP(LFKNMI(om, g1, g2));
 }
