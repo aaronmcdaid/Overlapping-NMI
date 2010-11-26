@@ -242,6 +242,17 @@ double LFKNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
 		( NMI_oneSide<false, true>(om, g1, g2)
 		+ NMI_oneSide<true , true>(om, g2, g1) );
 }
+struct Max {
+	double operator() (const double H_Xs, const double H_Ys) const {
+		return H_Xs > H_Ys ? H_Xs : H_Ys;
+	}
+};
+struct Sum {
+	double operator() (const double H_Xs, const double H_Ys) const {
+		return 0.5 * (H_Xs + H_Ys);
+	}
+};
+template<class Combiner>
 double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
 	double H_Xs = 0.0;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
@@ -254,9 +265,9 @@ double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2)
 		H_Ys += H(x, om.N)+H(om.N-x, om.N);
 	}
 	return 1.0 - 
-		( NMI_oneSide<false, false>(om, g1, g2)
-		+ NMI_oneSide<true , false>(om, g2, g1) )
-		/ (H_Xs + H_Ys)
+		// 0.5*( NMI_oneSide<false, false>(om, g1, g2) + NMI_oneSide<true , false>(om, g2, g1) )
+		Combiner()( NMI_oneSide<false, false>(om, g1, g2) , NMI_oneSide<true , false>(om, g2, g1) ) // TODO This is weird here. I(X;Y) shouldn't depend on Combiner really.
+		/ Combiner()(H_Xs, H_Ys)
 		;
 }
 
@@ -280,7 +291,8 @@ void oNMI(const char * file1, const char * file2) {
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
 		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
-	PP(aaronNMI(om, g1, g2));
+	PP(aaronNMI<Sum>(om, g1, g2));
+	PP(aaronNMI<Max>(om, g1, g2));
 	const double LFKnmi = LFKNMI(om, g1, g2);
 	cout << "         "; PP(LFKnmi);
 }
