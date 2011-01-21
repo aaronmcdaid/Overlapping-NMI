@@ -216,7 +216,8 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 }
 
 template<bool flip, bool normalizeTooSoon>
-double NMI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+	// this doesn't return the (N)MI. It's the non-mutual information, optionally normalized too soon
 	const int N = om.N;
 	double total = 0.0;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
@@ -239,8 +240,8 @@ double NMI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping 
 }
 double LFKNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
 	return 1.0 - 0.5 *
-		( NMI_oneSide<false, true>(om, g1, g2)
-		+ NMI_oneSide<true , true>(om, g2, g1) );
+		( VI_oneSide<false, true>(om, g1, g2)
+		+ VI_oneSide<true , true>(om, g2, g1) );
 }
 struct Max {
 	double operator() (const double H_Xs, const double H_Ys) const {
@@ -250,6 +251,11 @@ struct Max {
 struct Sum {
 	double operator() (const double H_Xs, const double H_Ys) const {
 		return 0.5 * (H_Xs + H_Ys);
+	}
+};
+struct Min {
+	double operator() (const double H_Xs, const double H_Ys) const {
+		return H_Xs > H_Ys ? H_Ys : H_Xs;
 	}
 };
 template<class Combiner>
@@ -264,9 +270,8 @@ double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2)
 		const int x = g1.at(fromId).size();
 		H_Ys += H(x, om.N)+H(om.N-x, om.N);
 	}
-	return 1.0 - 
-		// 0.5*( NMI_oneSide<false, false>(om, g1, g2) + NMI_oneSide<true , false>(om, g2, g1) )
-		Combiner()( NMI_oneSide<false, false>(om, g1, g2) , NMI_oneSide<true , false>(om, g2, g1) ) // TODO This is weird here. I(X;Y) shouldn't depend on Combiner really.
+	return
+		0.5*( H_Xs+H_Ys - VI_oneSide<false, false>(om, g1, g2) - VI_oneSide<true , false>(om, g2, g1) ) 
 		/ Combiner()(H_Xs, H_Ys)
 		;
 }
@@ -291,8 +296,9 @@ void oNMI(const char * file1, const char * file2) {
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
 		PP(HX_given_BestY<true>(om, g2, g1, fromId));
 	}
-	PP(aaronNMI<Sum>(om, g1, g2));
-	PP(aaronNMI<Max>(om, g1, g2));
-	const double LFKnmi = LFKNMI(om, g1, g2);
-	cout << "         "; PP(LFKnmi);
+	const double LFKnmi_ = LFKNMI(om, g1, g2);
+	cout << "Datum:\t"; PP(LFKnmi_);
+	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, g1, g2));
+	cout << "Datum:\t"; PP(aaronNMI<Max>(om, g1, g2));
+	// PP(aaronNMI<Min>(om, g1, g2)); This is awful :-)
 }
