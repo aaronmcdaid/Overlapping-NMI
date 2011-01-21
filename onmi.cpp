@@ -226,9 +226,21 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 			const double x = g2.at(toId).size();
 			const double H_X = H(x,N) + H(N-x,N);
 			const double norm = unnorm / H_X;
-			assert(norm <= 1.0);
-			assert(norm >= 0.0);
-			total += norm;
+			if(H_X == 0.0) { // the communities take up the whole set of nodes, and hence won't need any bits to be encoded. No need to add anything to 'total'
+				assert(unnorm == 0.0);
+			} else {
+				unless(norm <= 1.0) {
+					PP(x);
+					PP(N);
+					PP(H_X);
+					PP(unnorm);
+					PP(unnorm / H_X);
+					PP(unnorm - H_X);
+				}
+				assert(norm <= 1.0);
+				assert(norm >= 0.0);
+				total += norm;
+			}
 		} else
 			total += unnorm;
 	}
