@@ -81,7 +81,7 @@ typedef std::string Node;
 typedef std::vector< std::set< Node > > Grouping;
 typedef boost::unordered_map< Node, set<int> > NodeToGroup;
 struct OverlapMatrix {
-	boost::unordered_map< pair<int,int> , int> om; // the pair is an ordered pair. It's the overlap from the "ground truth" community to the "found" community.
+	std::map< pair<int,int> , int> om; // the pair is an ordered pair.
 	int N;
 };
 
@@ -198,19 +198,21 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 	// we're looking for the bits to encode X_realxId given all of Y
 	const int sizeOfXComm = g2.at(realxId).size();
 	double bestSoFar = H(sizeOfXComm,om.N) + H(om.N-sizeOfXComm,om.N);
-	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
-		int xId = o.first.first;
-		int yId = o.first.second;
-		if(realxId == xId) {
-			const int overlap = o.second;
-			const double H_XgivenY = H_X_given_Y(g1.at(yId).size(),g2.at(xId).size(), overlap, om.N);
-			if(bestSoFar > H_XgivenY)
-				bestSoFar = H_XgivenY;
-			// cout << '\t'; PPt(g1.at(fromId).size());
-			// PPt(g2.at(xId).size());
-			// PPt(overlap);
-			// PP(H_XgivenY);
-		}
+	std::map< pair<int,int> ,int >::const_iterator            i = om.om.lower_bound(make_pair(realxId, INT_MIN));
+	std::map< pair<int,int> ,int >::const_iterator   endOfRange = om.om.lower_bound(make_pair(realxId+1, INT_MIN));
+	for(; i != endOfRange; ++           i)
+	{
+		int xId =  i->first.first;
+		int yId =  i->first.second;
+		assert(realxId == xId);
+		const int overlap = i->second;
+		const double H_XgivenY = H_X_given_Y(g1.at(yId).size(),g2.at(xId).size(), overlap, om.N);
+		if(bestSoFar > H_XgivenY)
+			bestSoFar = H_XgivenY;
+		// cout << '\t'; PPt(g1.at(fromId).size());
+		// PPt(g2.at(xId).size());
+		// PPt(overlap);
+		// PP(H_XgivenY);
 	}
 	return bestSoFar;
 }
