@@ -192,16 +192,12 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 		return H_XY - H_Y;
 }
 
-template <bool flip>
 double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2, const int realxId) {
-	assert(!flip);
 	const int sizeOfXComm = g2.at(realxId).size();
 	double bestSoFar = H(sizeOfXComm,om.N) + H(om.N-sizeOfXComm,om.N);
 	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
 		int yId = o.first.first;
 		int xId   = o.first.second;
-		if(flip)
-			swap(yId, xId);
 		if(realxId == xId) {
 			const int overlap = o.second;
 			const double H_XgivenY = H_X_given_Y(g1.at(yId).size(),g2.at(xId).size(), overlap, om.N);
@@ -216,14 +212,13 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 	return bestSoFar;
 }
 
-template<bool flip, bool normalizeTooSoon>
+template<bool normalizeTooSoon>
 double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
-	assert(!flip);
 	// this doesn't return the (N)MI. It's the non-mutual information, optionally normalized too soon
 	const int N = om.N;
 	double total = 0.0;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
-		const double unnorm = HX_given_BestY<flip>(om, g1, g2, toId);
+		const double unnorm = HX_given_BestY(om, g1, g2, toId);
 		if(normalizeTooSoon) {
 			const double x = g2.at(toId).size();
 			const double H_X = H(x,N) + H(N-x,N);
@@ -254,8 +249,8 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 }
 double LFKNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const Grouping &g1, const Grouping &g2) {
 	return 1.0 - 0.5 *
-		( VI_oneSide<false, true>(om       , g1, g2)
-		+ VI_oneSide<false, true>(omFlipped, g2, g1) );
+		( VI_oneSide<true>(om       , g1, g2)
+		+ VI_oneSide<true>(omFlipped, g2, g1) );
 }
 struct Max {
 	double operator() (const double H_Xs, const double H_Ys) const {
@@ -285,7 +280,7 @@ double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const G
 		H_Ys += H(x, om.N)+H(om.N-x, om.N);
 	}
 	return
-		0.5*( H_Xs+H_Ys - VI_oneSide<false, false>(om, g1, g2) - VI_oneSide<false , false>(omFlipped, g2, g1) ) 
+		0.5*( H_Xs+H_Ys - VI_oneSide<false>(om, g1, g2) - VI_oneSide<false>(omFlipped, g2, g1) ) 
 		/ Combiner()(H_Xs, H_Ys)
 		;
 }
@@ -314,11 +309,11 @@ void oNMI(const char * file1, const char * file2) {
 
 	cout << "  \'" << file2 << "\' given \'" << file1 << "\"" << endl;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
-		PP(HX_given_BestY<false>(om, g1, g2, toId));
+		PP(HX_given_BestY(om, g1, g2, toId));
 	}
 	cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
-		PP(HX_given_BestY<false>(omFlipped, g2, g1, fromId));
+		PP(HX_given_BestY(omFlipped, g2, g1, fromId));
 	}
 	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
