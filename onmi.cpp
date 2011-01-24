@@ -250,7 +250,23 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 	else
 		return total;
 }
-double LFKNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+double LFKNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const Grouping &g1, const Grouping &g2) {
+	{
+		const double a = VI_oneSide<true , true>(om       , g1, g2);
+		const double b = VI_oneSide<false, true>(omFlipped, g1, g2);
+		DYINGWORDS(a==b) {
+			PP(a);
+			PP(b);
+		}
+	}
+	{
+		const double a = VI_oneSide<true , true>(om       , g2, g1);
+		const double b = VI_oneSide<false, true>(omFlipped, g2, g1);
+		DYINGWORDS(a==b) {
+			PP(a);
+			PP(b);
+		}
+	}
 	return 1.0 - 0.5 *
 		( VI_oneSide<false, true>(om, g1, g2)
 		+ VI_oneSide<true , true>(om, g2, g1) );
@@ -300,15 +316,27 @@ void oNMI(const char * file1, const char * file2) {
 	PP(n2g1.size());
 	PP(n2g2.size());
 	const OverlapMatrix om = overlapMatrix(n2g1, n2g2);
+
+	OverlapMatrix omFlipped;
+	omFlipped.N = om.N;
+	forEach(typeof(pair< pair<int,int> ,int>) p, amd::mk_range(om.om)) {
+		swap(p.first.first, p.first.second);
+		bool wasInserted = omFlipped.om.insert(p).second;
+		assert(wasInserted);
+	}
+	assert(omFlipped.om.size() == om.om.size());
+
 	cout << "  \'" << file2 << "\' given \'" << file1 << "\"" << endl;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
 		PP(HX_given_BestY<false>(om, g1, g2, toId));
 	}
 	cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
-		PP(HX_given_BestY<true>(om, g2, g1, fromId));
+		assert(HX_given_BestY<true>(om, g2, g1, fromId) == HX_given_BestY<false>(omFlipped, g2, g1, fromId));
+		PP(HX_given_BestY<false>(omFlipped, g2, g1, fromId));
 	}
-	const double LFKnmi_ = LFKNMI(om, g1, g2);
+	cout << "Here:" << endl;
+	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
 	cout << "Datum:\t"; PP(LFKnmi_);
 	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, g1, g2));
 	cout << "Datum:\t"; PP(aaronNMI<Max>(om, g1, g2));
