@@ -194,6 +194,7 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 
 template <bool flip>
 double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2, const int realxId) {
+	assert(!flip);
 	const int sizeOfXComm = g2.at(realxId).size();
 	double bestSoFar = H(sizeOfXComm,om.N) + H(om.N-sizeOfXComm,om.N);
 	forEach(const typeof(pair< const pair<int,int> , int >) &o, amd::mk_range(om.om)) {
@@ -217,6 +218,7 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 
 template<bool flip, bool normalizeTooSoon>
 double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+	assert(!flip);
 	// this doesn't return the (N)MI. It's the non-mutual information, optionally normalized too soon
 	const int N = om.N;
 	double total = 0.0;
@@ -251,25 +253,9 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 		return total;
 }
 double LFKNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const Grouping &g1, const Grouping &g2) {
-	{
-		const double a = VI_oneSide<true , true>(om       , g1, g2);
-		const double b = VI_oneSide<false, true>(omFlipped, g1, g2);
-		DYINGWORDS(a==b) {
-			PP(a);
-			PP(b);
-		}
-	}
-	{
-		const double a = VI_oneSide<true , true>(om       , g2, g1);
-		const double b = VI_oneSide<false, true>(omFlipped, g2, g1);
-		DYINGWORDS(a==b) {
-			PP(a);
-			PP(b);
-		}
-	}
 	return 1.0 - 0.5 *
-		( VI_oneSide<false, true>(om, g1, g2)
-		+ VI_oneSide<true , true>(om, g2, g1) );
+		( VI_oneSide<false, true>(om       , g1, g2)
+		+ VI_oneSide<false, true>(omFlipped, g2, g1) );
 }
 struct Max {
 	double operator() (const double H_Xs, const double H_Ys) const {
@@ -287,7 +273,7 @@ struct Min {
 	}
 };
 template<class Combiner>
-double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2) {
+double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const Grouping &g1, const Grouping &g2) {
 	double H_Xs = 0.0;
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
 		const int x = g2.at(toId).size();
@@ -299,7 +285,7 @@ double aaronNMI(const OverlapMatrix &om, const Grouping &g1, const Grouping &g2)
 		H_Ys += H(x, om.N)+H(om.N-x, om.N);
 	}
 	return
-		0.5*( H_Xs+H_Ys - VI_oneSide<false, false>(om, g1, g2) - VI_oneSide<true , false>(om, g2, g1) ) 
+		0.5*( H_Xs+H_Ys - VI_oneSide<false, false>(om, g1, g2) - VI_oneSide<false , false>(omFlipped, g2, g1) ) 
 		/ Combiner()(H_Xs, H_Ys)
 		;
 }
@@ -332,13 +318,12 @@ void oNMI(const char * file1, const char * file2) {
 	}
 	cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
 	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
-		assert(HX_given_BestY<true>(om, g2, g1, fromId) == HX_given_BestY<false>(omFlipped, g2, g1, fromId));
 		PP(HX_given_BestY<false>(omFlipped, g2, g1, fromId));
 	}
 	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
 	cout << "Datum:\t"; PP(LFKnmi_);
-	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, g1, g2));
-	cout << "Datum:\t"; PP(aaronNMI<Max>(om, g1, g2));
+	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, omFlipped, g1, g2));
+	cout << "Datum:\t"; PP(aaronNMI<Max>(om, omFlipped, g1, g2));
 	// PP(aaronNMI<Min>(om, g1, g2)); This is awful :-)
 }
