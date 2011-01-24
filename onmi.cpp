@@ -184,12 +184,15 @@ double H_X_given_Y (const int y, const int x, const int o, const int N) {
 			+ H(y-o, N)
 			+ H(o, N)
 			;
-		DYINGWORDS(H_X >= H_XY - H_Y) {
-			PP(H_X);
-			PP(H_XY - H_Y);
-			PP(H_X - (H_XY - H_Y));
-		}
-		return H_XY - H_Y;
+		if(H_X < H_XY - H_Y) { // this shouldn't really happen, except by a roundoff error
+			DYINGWORDS( VERYCLOSE(H_X , H_XY - H_Y)) {
+				PP(H_X);
+				PP(H_XY - H_Y);
+				PP(H_X - (H_XY - H_Y));
+			}
+			return H_X;
+		} else
+			return H_XY - H_Y;
 }
 
 double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Grouping &g2, const int realxId) {
