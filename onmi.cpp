@@ -326,6 +326,87 @@ double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const G
 		;
 }
 
+double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
+	set<Node> nodes;
+	for(NodeToGroup::const_iterator i = ng1.begin(); i!=ng1.end(); i++) { nodes.insert(i->first); }
+	for(NodeToGroup::const_iterator i = ng2.begin(); i!=ng2.end(); i++) { nodes.insert(i->first); }
+
+	vector<Node> nodesv;
+	for(set<Node>::const_iterator i=nodes.begin(); i!=nodes.end(); i++) { nodesv.push_back(*i); }
+	const int N=nodesv.size();
+
+	map<int,int> A;
+	map< pair<int,int> ,int> B;
+	map<int,int> N_bottom;
+	map<int,int> N_side;
+
+	int minJK = 0;
+	for(int n=0; n<N; n++) {
+		for(int m=0; m<n; m++) {
+			// PP2(n,m);
+			const Node n_ = nodesv.at(n);
+			const Node m_ = nodesv.at(m);
+			// PP2(n_,m_);
+			const int a = ng1.sharedGroups(n_,m_);
+			// const int b = ng1.sharedGroups(m_,n_);
+			const int c = ng2.sharedGroups(n_,m_);
+			// const int d = ng2.sharedGroups(m_,n_);
+			// assert(a==b);
+			// assert(c==d);
+			// PP4(a,b,c,d);
+			// assert(a!=1 || d!=0);
+			if(a==c)
+				A[a]++;
+			B[make_pair(a,c)]++;
+			N_bottom[a]++;
+			N_side  [c]++;
+			if(minJK < a)
+				minJK=a;
+			if(minJK < c)
+				minJK=c;
+		}
+	}
+	PP(minJK);
+
+	long int bigN = 0;
+	{ // verification
+		/*
+		forEach(const typeof(pair<int,int>) &Aj, amd::mk_range(A)) {
+			PP2(Aj.first, Aj.second);
+		}
+		forEach(const typeof(pair< pair<int,int>,int>) &Bij, amd::mk_range(B)) {
+			PP3(Bij.first.first, Bij.first.second, Bij.second);
+		}
+		*/
+		forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
+			// PP2(Nj.first, Nj.second);
+			bigN += Nj.second;
+		}
+		int verifyNumPairs3 = 0;
+		forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_side  )) {
+			// PP2(Nj.first, Nj.second);
+			verifyNumPairs3 += Nj.second;
+		}
+		assert(bigN == N*(N-1)/2);
+		assert(verifyNumPairs3 == N*(N-1)/2);
+	}
+
+	long int numerator = 0;
+	for(int j=0; j<=minJK; j++) {
+		numerator += bigN * A[j];
+		numerator -= N_bottom[j] * N_side[j];
+	}
+	long int denominator = 0;
+	denominator += bigN * bigN;
+	for(int j=0; j<=minJK; j++) {
+		denominator -= N_bottom[j] * N_side[j];
+	}
+	PP(numerator);
+	PP(denominator);
+	double O = double(numerator) / double(denominator);
+	return O;
+}
+
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
@@ -358,6 +439,8 @@ void oNMI(const char * file1, const char * file2) {
 	}
 	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
+	const double Omega = omega(n2g1, n2g2);
+	cout << "Datum:\t"; PP(Omega);
 	cout << "Datum:\t"; PP(LFKnmi_);
 	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, omFlipped, g1, g2));
 	cout << "Datum:\t"; PP(aaronNMI<Max>(om, omFlipped, g1, g2));
