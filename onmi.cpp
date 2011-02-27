@@ -326,7 +326,7 @@ double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const G
 		;
 }
 
-double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
+pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	set<Node> nodes;
 	for(NodeToGroup::const_iterator i = ng1.begin(); i!=ng1.end(); i++) { nodes.insert(i->first); }
 	for(NodeToGroup::const_iterator i = ng2.begin(); i!=ng2.end(); i++) { nodes.insert(i->first); }
@@ -341,6 +341,7 @@ double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	map<int,int> N_side;
 
 	int minJK = 0;
+	long int sumOfSquares = 0;
 	for(int n=0; n<N; n++) {
 		for(int m=0; m<n; m++) {
 			// PP2(n,m);
@@ -364,11 +365,20 @@ double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 				minJK=a;
 			if(minJK < c)
 				minJK=c;
+
+
+			{ // Latouches's L2 norm
+				PP2(a-c, (a-c)*(a-c));
+				sumOfSquares += (a-c)*(a-c);
+			}
 		}
 	}
 	PP(minJK);
 
 	long int bigN = 0;
+	forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
+		bigN += Nj.second;
+	}
 	{ // verification
 		/*
 		forEach(const typeof(pair<int,int>) &Aj, amd::mk_range(A)) {
@@ -377,11 +387,10 @@ double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 		forEach(const typeof(pair< pair<int,int>,int>) &Bij, amd::mk_range(B)) {
 			PP3(Bij.first.first, Bij.first.second, Bij.second);
 		}
-		*/
 		forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
 			// PP2(Nj.first, Nj.second);
-			bigN += Nj.second;
 		}
+		*/
 		int verifyNumPairs3 = 0;
 		forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_side  )) {
 			// PP2(Nj.first, Nj.second);
@@ -390,6 +399,8 @@ double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 		assert(bigN == N*(N-1)/2);
 		assert(verifyNumPairs3 == N*(N-1)/2);
 	}
+
+	double L2norm = sqrt(sumOfSquares);
 
 	long int numerator = 0;
 	for(int j=0; j<=minJK; j++) {
@@ -404,7 +415,7 @@ double omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	PP(numerator);
 	PP(denominator);
 	double O = double(numerator) / double(denominator);
-	return O;
+	return make_pair(O,L2norm);
 }
 
 void oNMI(const char * file1, const char * file2) {
@@ -439,8 +450,11 @@ void oNMI(const char * file1, const char * file2) {
 	}
 	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
-	const double Omega = omega(n2g1, n2g2);
+	double Omega;
+	double L2norm;
+	boost::tie(Omega,L2norm)	= omega(n2g1, n2g2);
 	cout << "Datum:\t"; PP(Omega);
+	cout << "Datum:\t"; PP(L2norm);
 	cout << "Datum:\t"; PP(LFKnmi_);
 	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, omFlipped, g1, g2));
 	cout << "Datum:\t"; PP(aaronNMI<Max>(om, omFlipped, g1, g2));
