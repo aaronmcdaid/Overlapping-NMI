@@ -79,7 +79,40 @@ int main(int argc, char ** argv) {
 
 typedef std::string Node;
 typedef std::vector< std::set< Node > > Grouping;
-typedef boost::unordered_map< Node, set<int> > NodeToGroup;
+struct NodeToGroup : public boost::unordered_map< Node, set<int> > {
+	int sharedGroups(const Node n_, const Node m_) const {
+		// PP2(n_,m_);
+		static const set<int> emptySet;
+
+		const set<int> * nGrps;
+		if(this->count(n_)==1)
+			nGrps = &(this->at(n_));
+		else
+			nGrps = &emptySet;
+		// PP(nGrps->size());
+
+		const set<int> * mGrps;
+		if(this->count(m_)==1)
+			mGrps = &(this->at(m_));
+		else
+			mGrps = &emptySet;
+		// PP(mGrps->size());
+
+		vector<int> intersection;
+		set_intersection(
+				nGrps->begin(), nGrps->end(),
+				mGrps->begin(), mGrps->end(),
+				back_inserter(intersection)
+				);
+		const int inter = intersection.size();
+		// PP(inter);
+
+		assert(inter <= (int)nGrps->size());
+		assert(inter <= (int)mGrps->size());
+
+		return inter;
+	}
+};
 struct OverlapMatrix {
 	std::map< pair<int,int> , int> om; // the pair is an ordered pair.
 	int N;
