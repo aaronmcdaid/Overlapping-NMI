@@ -1,0 +1,5 @@
+package "oNMI"
+version "0.1"
+purpose "Compare sets of sets using various measures"
+option  "git-version"        - "detailed version description"        flag       off
+option  "print-everything"   - "detailed debugging"                  flag       off

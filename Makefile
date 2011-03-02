@@ -15,7 +15,7 @@ tags:
 
 					#-Wclobbered   -Wempty-body   \ -Wignored-qualifiers  -Woverride-init   \ -Wtype-limits   -Wunused-but-set-parameter 
 # I'm including most of the -Wextra flags, but I want rid of the enum-in-conditional warning from boost
-CFLAGS=       \
+CXXFLAGS:=       \
           -Wmissing-field-initializers   \
           -Wsign-compare   \
           -Wuninitialized   \
@@ -31,12 +31,16 @@ boost_1_41_0:
 
 #CXXFLAGS= ${BITS}     -g
 LDFLAGS+= -lstdc++ -lrt
-#CXXFLAGS= ${BITS} -O3 -p -pg ${CFLAGS} # -DNDEBUG
-CXXFLAGS= ${BITS} -O3        ${CFLAGS} # -DNDEBUG
+#CXXFLAGS= ${BITS} -O3 -p -pg ${CXXFLAGS} # -DNDEBUG
+CXXFLAGS:= ${BITS} -O3        ${CXXFLAGS} # -DNDEBUG
 #CXXFLAGS=              -O2                 
 
 gitstatus.txt: 
-	{ git log | head -n 1 ; git status ; } | head -n 10 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt
+	{ git log | head -n 1 ; git status ; } | head -n 20 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt
 gitstatus.o: comment.txt  gitstatus.txt
 
-onmi: gitstatus.o Range.o onmi.o
+onmi: gitstatus.o Range.o onmi.o cmdline.o
+
+cmdline.c:
+	# remake cmdline.c . But it's OK unless you change the .ggo file. You'll need gengetopt(1) to be able to run this.
+	gengetopt  --unamed-opts < onmi_opts.ggo

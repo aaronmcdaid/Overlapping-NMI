@@ -14,6 +14,8 @@
 #include "easy_options.hpp"
 #include "gitstatus.hpp"
 
+#include "cmdline.h"
+
 
 #define DEBUGBYDEFAULT
 
@@ -36,7 +38,6 @@ template <       > struct Flag<arg_d> : public RequiredArg, StringArgument, Flag
 }
 
 //exceptions
-struct UsageMessage { };
 struct BadlyFormedArg_o {};
 struct MissingFile {};
 struct EmptyFile {};
@@ -46,34 +47,21 @@ void oNMI(const char * file1, const char * file2);
 int main(int argc, char ** argv) {
 	std::locale system_locale("");
 	std::cout.imbue(system_locale); // to get comma-separated integers.
-#ifdef DEBUGBYDEFAULT
-	if(1)
-#else
-	if(getenv("DEBUG"))
-#endif
-	{
+	gengetopt_args_info args_info;
+	if (cmdline_parser (argc, argv, &args_info) != 0)
+		exit(1) ;
+	if(args_info.git_version_flag) {
 		PP(gitstatus);
 		for (int i=0; i<argc; i++) {
 			PP(argv[i]);
 		}
 	}
-	typedef 	pair< arg_o,
-			pair< arg_d,
-			easy_options::nil
-			>
-			>
-		Flags;
-	easy_options::MyGetOpt<Flags> f2;
-	f2.processOptions(argc, argv);
-
-
-	// cout << "-d arg is '" << f2.get_<arg_d>("\t") << "'" << endl;
-	// cout << "-f arg is '" << f2.get_<arg_o>("1-") << "'" << endl;
-	if(argc - optind != 2) {
-		throw UsageMessage();
+	if(args_info.inputs_num != 2) {
+		cmdline_parser_print_help();
+		exit(1);
 	}
-	const char *file1 = argv[optind];
-	const char *file2 = argv[optind+1];
+	const char *file1 = args_info.inputs[0];
+	const char *file2 = args_info.inputs[1];
 	oNMI(file1, file2);
 }
 
