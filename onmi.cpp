@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <math.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -6,8 +7,11 @@
 
 #include <vector>
 #include <set>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
+
+namespace extra = std::tr1;
+// namespace extra = boost;
 
 
 #include "aaron_utils.hpp"
@@ -67,21 +71,23 @@ int main(int argc, char ** argv) {
 
 typedef std::string Node;
 typedef std::vector< std::set< Node > > Grouping;
-struct NodeToGroup : public boost::unordered_map< Node, set<int> > {
+struct NodeToGroup : public
+		     extra::unordered_map< Node, set<int> >
+{
 	int sharedGroups(const Node n_, const Node m_) const {
 		// PP2(n_,m_);
 		static const set<int> emptySet;
 
 		const set<int> * nGrps;
 		if(this->count(n_)==1)
-			nGrps = &(this->at(n_));
+			nGrps = &(this->find(n_)->second);
 		else
 			nGrps = &emptySet;
 		// PP(nGrps->size());
 
 		const set<int> * mGrps;
 		if(this->count(m_)==1)
-			mGrps = &(this->at(m_));
+			mGrps = &(this->find(m_)->second);
 		else
 			mGrps = &emptySet;
 		// PP(mGrps->size());
@@ -143,7 +149,7 @@ NodeToGroup nodeToGroup(const Grouping &g) {
 
 const OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	OverlapMatrix om;
-	boost::unordered_set< Node > nodes;
+	extra::unordered_set< Node > nodes;
 	forEach(const NodeToGroup::value_type &n, amd::mk_range(ng2)) {
 		nodes.insert(n.first);
 	}
@@ -151,8 +157,8 @@ const OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2
 		nodes.insert(n.first);
 	}
 	forEach(const Node &n, amd::mk_range(nodes)) {
-		if(ng1.count(n)) forEach(const int g1, amd::mk_range(ng1.at(n))) {
-			if(ng2.count(n)) forEach(const int g2, amd::mk_range(ng2.at(n))) {
+		if(ng1.count(n)) forEach(const int g1, amd::mk_range(ng1.find(n)->second)) {
+			if(ng2.count(n)) forEach(const int g2, amd::mk_range(ng2.find(n)->second)) {
 				om.om[make_pair(g1,g2)] ++;
 			}
 		}
@@ -438,9 +444,9 @@ void oNMI(const char * file1, const char * file2) {
 	}
 	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
-	double Omega;
-	double L2norm;
-	boost::tie(Omega,L2norm)	= omega(n2g1, n2g2);
+	pair<double,double> OmegaAndL2Norm = omega(n2g1, n2g2);
+	const double Omega = OmegaAndL2Norm.first;
+	const double L2norm = OmegaAndL2Norm.second;
 	cout << "Datum:\t"; PP(Omega);
 	cout << "Datum:\t"; PP(L2norm);
 	cout << "Datum:\t"; PP(LFKnmi_);
