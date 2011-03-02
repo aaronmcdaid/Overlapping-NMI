@@ -41,6 +41,8 @@ struct EmptyFile {};
 
 void oNMI(const char * file1, const char * file2);
 
+static int global_verbose_flag = 0;
+
 int main(int argc, char ** argv) {
 	std::locale system_locale("");
 	std::cout.imbue(system_locale); // to get comma-separated integers.
@@ -56,6 +58,9 @@ int main(int argc, char ** argv) {
 	if(args_info.inputs_num != 2) {
 		cmdline_parser_print_help();
 		exit(1);
+	}
+	if(args_info.verbose_flag) {
+		global_verbose_flag = 1;
 	}
 	const char *file1 = args_info.inputs[0];
 	const char *file2 = args_info.inputs[1];
@@ -355,7 +360,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 
 
 			{ // Latouches's L2 norm
-				PP2(a-c, (a-c)*(a-c));
+				v2(a-c, (a-c)*(a-c));
 				sumOfSquares += (a-c)*(a-c);
 			}
 		}

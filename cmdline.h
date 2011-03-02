@@ -36,13 +36,13 @@ struct gengetopt_args_info
   const char *version_help; /**< @brief Print version and exit help description.  */
   int git_version_flag;	/**< @brief detailed version description (default=off).  */
   const char *git_version_help; /**< @brief detailed version description help description.  */
-  int print_everything_flag;	/**< @brief detailed debugging (default=off).  */
-  const char *print_everything_help; /**< @brief detailed debugging help description.  */
+  int verbose_flag;	/**< @brief detailed debugging (default=off).  */
+  const char *verbose_help; /**< @brief detailed debugging help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int git_version_given ;	/**< @brief Whether git-version was given.  */
-  unsigned int print_everything_given ;	/**< @brief Whether print-everything was given.  */
+  unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
