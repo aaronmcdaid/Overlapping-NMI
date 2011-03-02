@@ -36,7 +36,7 @@ CXXFLAGS:= ${BITS} -O3        ${CXXFLAGS} # -DNDEBUG
 #CXXFLAGS=              -O2                 
 
 gitstatus.txt: 
-	{ git log | head -n 1 ; git status ; } | head -n 20 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt
+	which git && { git log | head -n 1 ; git status ; } | head -n 20 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt || echo "\"you do not have git (git-scm.com) installed\\\n\"" > gitstatus.txt
 gitstatus.o: comment.txt  gitstatus.txt
 
 onmi: gitstatus.o Range.o onmi.o cmdline.o
