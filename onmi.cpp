@@ -365,7 +365,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 			}
 		}
 	}
-	PP(minJK);
+	v1(minJK);
 
 	long int bigN = 0;
 	forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
@@ -404,8 +404,8 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	for(int j=0; j<=minJK; j++) {
 		denominator -= N_bottom[j] * N_side[j];
 	}
-	PP(numerator);
-	PP(denominator);
+	v1(numerator);
+	v1(denominator);
 	double O = double(numerator) / double(denominator);
 	return make_pair(O,L2norm);
 }
@@ -413,14 +413,14 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 void oNMI(const char * file1, const char * file2) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
-	PP(g1.size());
-	PP(g2.size());
+	v1(g1.size());
+	v1(g2.size());
 	unless(g1.size() > 0) throw EmptyFile();
 	unless(g2.size() > 0) throw EmptyFile();
 	NodeToGroup n2g1 = nodeToGroup(g1);
 	NodeToGroup n2g2 = nodeToGroup(g2);
-	PP(n2g1.size());
-	PP(n2g2.size());
+	v1(n2g1.size());
+	v1(n2g2.size());
 	const OverlapMatrix om = overlapMatrix(n2g1, n2g2);
 
 	OverlapMatrix omFlipped;
@@ -432,15 +432,17 @@ void oNMI(const char * file1, const char * file2) {
 	}
 	assert(omFlipped.om.size() == om.om.size());
 
-	cout << "  \'" << file2 << "\' given \'" << file1 << "\"" << endl;
-	for(int toId = 0; toId < (int)g2.size(); toId++) {
-		PP(HX_given_BestY(omFlipped, g1, g2, toId));
+	if(global_verbose_flag) {
+		cout << "  \'" << file2 << "\' given \'" << file1 << "\"" << endl;
+		for(int toId = 0; toId < (int)g2.size(); toId++) {
+			PP(HX_given_BestY(omFlipped, g1, g2, toId));
+		}
+		cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
+		for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
+			PP(HX_given_BestY(om       , g2, g1, fromId));
+		}
+		cout << "Here:" << endl;
 	}
-	cout << "  \'" << file1 << "\' given \'" << file2 << "\"" << endl;
-	for(int fromId = 0; fromId < (int)g1.size(); fromId++) {
-		PP(HX_given_BestY(om       , g2, g1, fromId));
-	}
-	cout << "Here:" << endl;
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
 	pair<double,double> OmegaAndL2Norm = omega(n2g1, n2g2);
 	const double Omega = OmegaAndL2Norm.first;
