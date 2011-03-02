@@ -7,7 +7,7 @@ help:
 	echo check the makefile
 
 clean:
-	-rm tags acp *.o
+	-rm tags acp *.o onmi cut
 
 tags:
 	ctags *.[ch]pp
