@@ -1,5 +1,6 @@
 #include "Range.hpp"
 
+#include <string.h>
 #include <assert.h>
 
 namespace amd {

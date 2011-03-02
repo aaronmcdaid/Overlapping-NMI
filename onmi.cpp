@@ -1,10 +1,12 @@
 #include <getopt.h>
 #include <math.h>
+#include <limits.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <exception>
 
+#include <algorithm>
 #include <vector>
 #include <set>
 #include <tr1/unordered_map>
