@@ -35,16 +35,7 @@ using namespace std;
  *  -a (optional arg)
  */
 
-
-struct arg_o {};
-struct arg_d {};
-namespace easy_options {
-template <       > struct Flag<arg_o> : public RequiredArg, StringArgument, FlagPresent { static const char option_character = 'o'; };
-template <       > struct Flag<arg_d> : public RequiredArg, StringArgument, FlagPresent { static const char option_character = 'd'; };
-}
-
 //exceptions
-struct BadlyFormedArg_o {};
 struct MissingFile {};
 struct EmptyFile {};
 
