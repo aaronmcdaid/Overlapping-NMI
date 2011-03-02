@@ -44,8 +44,8 @@ void oNMI(const char * file1, const char * file2);
 static int global_verbose_flag = 0;
 
 int main(int argc, char ** argv) {
-	std::locale system_locale("");
-	std::cout.imbue(system_locale); // to get comma-separated integers.
+	// std::locale system_locale("");
+	// std::cout.imbue(system_locale); // to get comma-separated integers.
 	gengetopt_args_info args_info;
 	if (cmdline_parser (argc, argv, &args_info) != 0)
 		exit(1) ;
