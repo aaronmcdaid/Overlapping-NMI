@@ -255,9 +255,12 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 		if(normalizeTooSoon) {
 			const double x = g2.at(toId).size();
 			const double H_X = H(x,N) + H(N-x,N);
-			const double norm = unnorm / H_X;
+			const double norm = unnorm / H_X; // might be NaN
 			if(H_X == 0.0) { // the communities take up the whole set of nodes, and hence won't need any bits to be encoded. No need to add anything to 'total'
 				assert(unnorm == 0.0);
+
+				// in this case norm is 0/0, but we'll just define this as 1 // This is the bugfix/ambiguityfix to make it the same as the LFK software
+				total += 1.0;
 			} else {
 				unless(norm <= 1.0) {
 					PP(x);
@@ -271,13 +274,13 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 				assert(norm >= 0.0);
 				total += norm;
 			}
-		} else
+		} else {
 			total += unnorm;
+		}
 	}
-	// PP(total / g2.size());
-	if(normalizeTooSoon)
-		return total / g2.size();
-	else
+	if(normalizeTooSoon) {
+		return total / g2.size(); // why is this total zero? When it should be one in some cases.
+	} else
 		return total;
 }
 double LFKNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const Grouping &g1, const Grouping &g2) {
@@ -360,7 +363,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 
 
 			{ // Latouches's L2 norm
-				v2(a-c, (a-c)*(a-c));
+				// v2(a-c, (a-c)*(a-c));
 				sumOfSquares += (a-c)*(a-c);
 			}
 		}
