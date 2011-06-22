@@ -10,6 +10,7 @@ using namespace std;
 #include <stdlib.h>
 #include <sys/time.h>
 #include <map>
+#include <vector>
 #include "Range.hpp"
 
 typedef long long int64;
@@ -234,6 +235,24 @@ typename C::value_type constAt(const C &c, int i) {
 
 struct NotImplemented {
 };
+
+struct FormatFlagStack {
+	std :: vector< ios_base :: fmtflags> the_stack;
+	std :: vector< std      :: streamsize > the_stack_of_precision; // setprecision(...)
+	struct PushT {
+		FormatFlagStack * const parent_stack;
+		PushT (FormatFlagStack *parent_stack_);
+	} push;
+	struct PopT {
+		FormatFlagStack * const parent_stack;
+		PopT  (FormatFlagStack *parent_stack_);
+	} pop;
+	FormatFlagStack();
+	void do_push(ostream &str);
+	void do_pop(ostream &str);
+};
+ostream & operator<< (ostream &str, const FormatFlagStack :: PushT & pusher);
+ostream & operator<< (ostream &str, const FormatFlagStack :: PopT  & pusher);
 
 } // namespace amd
 
