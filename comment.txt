@@ -1,2 +1,0 @@
-"Comment: Corrected constraint to ensure no complements allowed"
-"\n"
