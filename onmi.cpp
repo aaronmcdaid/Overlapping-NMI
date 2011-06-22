@@ -17,7 +17,6 @@ namespace extra = std::tr1;
 
 
 #include "aaron_utils.hpp"
-#include "easy_options.hpp"
 
 #include "cmdline.h"
 
