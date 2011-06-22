@@ -3,6 +3,8 @@ BITS=
 #BITS=-m32
 #BITS=-m64
 
+all: onmi
+
 help:
 	echo check the makefile
 
