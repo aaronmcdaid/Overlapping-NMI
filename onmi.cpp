@@ -18,7 +18,6 @@ namespace extra = std::tr1;
 
 #include "aaron_utils.hpp"
 #include "easy_options.hpp"
-#include "gitstatus.hpp"
 
 #include "cmdline.h"
 
@@ -49,12 +48,6 @@ int main(int argc, char ** argv) {
 	gengetopt_args_info args_info;
 	if (cmdline_parser (argc, argv, &args_info) != 0)
 		exit(1) ;
-	if(args_info.git_version_flag) {
-		PP(gitstatus);
-		for (int i=0; i<argc; i++) {
-			PP(argv[i]);
-		}
-	}
 	if(args_info.inputs_num != 2) {
 		cmdline_parser_print_help();
 		exit(1);

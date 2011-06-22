@@ -28,10 +28,9 @@ const char *gengetopt_args_info_usage = "Usage: oNMI [OPTIONS]... [FILES]...";
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help         Print help and exit",
-  "  -V, --version      Print version and exit",
-  "      --git-version  detailed version description  (default=off)",
-  "  -v, --verbose      detailed debugging  (default=off)",
+  "  -h, --help     Print help and exit",
+  "  -V, --version  Print version and exit",
+  "  -v, --verbose  detailed debugging  (default=off)",
     0
 };
 
@@ -57,14 +56,12 @@ void clear_given (struct gengetopt_args_info *args_info)
 {
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
-  args_info->git_version_given = 0 ;
   args_info->verbose_given = 0 ;
 }
 
 static
 void clear_args (struct gengetopt_args_info *args_info)
 {
-  args_info->git_version_flag = 0;
   args_info->verbose_flag = 0;
   
 }
@@ -76,8 +73,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
 
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
-  args_info->git_version_help = gengetopt_args_info_help[2] ;
-  args_info->verbose_help = gengetopt_args_info_help[3] ;
+  args_info->verbose_help = gengetopt_args_info_help[2] ;
   
 }
 
@@ -197,8 +193,6 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "help", 0, 0 );
   if (args_info->version_given)
     write_into_file(outfile, "version", 0, 0 );
-  if (args_info->git_version_given)
-    write_into_file(outfile, "git-version", 0, 0 );
   if (args_info->verbose_given)
     write_into_file(outfile, "verbose", 0, 0 );
   
@@ -428,7 +422,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       static struct option long_options[] = {
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
-        { "git-version",	0, NULL, 0 },
         { "verbose",	0, NULL, 'v' },
         { NULL,	0, NULL, 0 }
       };
@@ -461,20 +454,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           break;
 
         case 0:	/* Long option with no short option */
-          /* detailed version description.  */
-          if (strcmp (long_options[option_index].name, "git-version") == 0)
-          {
-          
-          
-            if (update_arg((void *)&(args_info->git_version_flag), 0, &(args_info->git_version_given),
-                &(local_args_info.git_version_given), optarg, 0, 0, ARG_FLAG,
-                check_ambiguity, override, 1, 0, "git-version", '-',
-                additional_error))
-              goto failure;
-          
-          }
-          
-          break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
           goto failure;

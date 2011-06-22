@@ -7,7 +7,7 @@ help:
 	echo check the makefile
 
 clean:
-	-rm tags acp *.o onmi cut
+	-rm tags *.o onmi
 
 tags:
 	ctags *.[ch]pp
@@ -21,13 +21,8 @@ CXXFLAGS:=       \
           -Wuninitialized   \
           -Wunused-parameter    \
           -Wunused             \
-          -Wall -Wformat -Werror -I./boost_1_41_0
+          -Wall -Wformat -Werror 
 
-boost_1_41_0:
-	@echo "   " This needs Boost. It has been tested with boost 1.41 .
-	@echo "   " Extract this to a folder called boost_1_41_0 . 
-	@echo "   " http://sourceforge.net/projects/boost/files/boost/1.41.0/
-	false
 
 #CXXFLAGS= ${BITS}     -g
 LDFLAGS+= -lstdc++ -lrt
@@ -35,12 +30,8 @@ LDFLAGS+= -lstdc++ -lrt
 CXXFLAGS:= ${BITS} -O3        ${CXXFLAGS} # -DNDEBUG
 #CXXFLAGS=              -O2                 
 
-gitstatus.txt: 
-	which git && { git log | head -n 1 ; git status ; } | head -n 20 | sed -re 's/"/\\"/g ; s/^/"/g; s/$$/\\n"/g; ' > gitstatus.txt || echo "\"you do not have git (git-scm.com) installed\\\n\"" > gitstatus.txt
-gitstatus.o: comment.txt  gitstatus.txt
+onmi: Range.o onmi.o cmdline.o
 
-onmi: gitstatus.o Range.o onmi.o cmdline.o
-
-cmdline.c:
+cmdline.c.FORCE:
 	# remake cmdline.c . But it's OK unless you change the .ggo file. You'll need gengetopt(1) to be able to run this.
 	gengetopt  --unamed-opts < onmi_opts.ggo
