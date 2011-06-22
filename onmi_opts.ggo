@@ -1,4 +1,5 @@
 package "oNMI"
 version "0.1"
 purpose "Compare sets of sets using various measures"
+usage "oNMI [OPTIONS]... filename filename"
 option  "verbose"            v "detailed debugging"                  flag       off

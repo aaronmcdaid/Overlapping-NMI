@@ -23,7 +23,7 @@
 
 const char *gengetopt_args_info_purpose = "Compare sets of sets using various measures";
 
-const char *gengetopt_args_info_usage = "Usage: oNMI [OPTIONS]... [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: oNMI [OPTIONS]... filename filename";
 
 const char *gengetopt_args_info_description = "";
 
