@@ -263,7 +263,7 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 	for(int toId = 0; toId < (int)g2.size(); toId++) {
 		const double unnorm = HX_given_BestY(om, g1, g2, toId);
 		if(normalizeTooSoon) {
-			const double x = g2.at(toId).size();
+			const int x = g2.at(toId).size();
 			const double H_X = H(x,N) + H(N-x,N);
 			const double norm = unnorm / H_X; // might be NaN
 			if(H_X == 0.0) { // the communities take up the whole set of nodes, and hence won't need any bits to be encoded. No need to add anything to 'total'
