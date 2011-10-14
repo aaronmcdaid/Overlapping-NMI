@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdio.h> // for EOF
 
 namespace amd {
 
