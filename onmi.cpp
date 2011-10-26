@@ -457,13 +457,18 @@ void oNMI(const char * file1, const char * file2) {
 		cout << "Here:" << endl;
 	}
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
+#ifdef DO_OMEGA_ALSO // it's slow though!
 	pair<double,double> OmegaAndL2Norm = omega(n2g1, n2g2);
+#endif
+#ifdef DO_OMEGA_ALSO
 	const double Omega = OmegaAndL2Norm.first;
 	const double L2norm = OmegaAndL2Norm.second;
 	cout << "Datum:\t"; PP(Omega);
 	cout << "Datum:\t"; PP(L2norm);
-	cout << "Datum:\t"; PP(LFKnmi_);
-	cout << "Datum:\t"; PP(aaronNMI<Sum>(om, omFlipped, g1, g2));
-	cout << "Datum:\t"; PP(aaronNMI<Max>(om, omFlipped, g1, g2));
+#endif
+	cout << "NMI<Max>:\t"; cout << aaronNMI<Max>(om, omFlipped, g1, g2) << endl;
+	cout << "Other measures:" << endl;
+	cout << "  lfkNMI:\t"; cout << LFKnmi_ << endl;
+	cout << "  NMI<Sum>:\t"; cout << aaronNMI<Sum>(om, omFlipped, g1, g2) << endl;
 	// PP(aaronNMI<Min>(om, g1, g2)); This is awful :-)
 }
