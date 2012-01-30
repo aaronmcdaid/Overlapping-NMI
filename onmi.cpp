@@ -272,7 +272,7 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 				// in this case norm is 0/0, but we'll just define this as 1 // This is the bugfix/ambiguityfix to make it the same as the LFK software
 				total += 1.0;
 			} else {
-				unless(norm <= 1.0) {
+				unless(norm <= 1.01) {
 					PP(x);
 					PP(N);
 					PP(H_X);
@@ -280,7 +280,7 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 					PP(unnorm / H_X);
 					PP(unnorm - H_X);
 				}
-				assert(norm <= 1.0);
+				assert(norm <= 1.01);
 				assert(norm >= 0.0);
 				total += norm;
 			}
