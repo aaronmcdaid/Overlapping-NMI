@@ -27,7 +27,8 @@ CXXFLAGS:=       \
 
 
 #CXXFLAGS= ${BITS}     -g
-LDFLAGS+= -lstdc++ -lrt
+LDFLAGS+= -lrt -lm
+CC=g++
 #CXXFLAGS= ${BITS} -O3 -p -pg ${CXXFLAGS} # -DNDEBUG
 CXXFLAGS:= ${BITS} -O3        ${CXXFLAGS} # -DNDEBUG
 #CXXFLAGS=              -O2                 
