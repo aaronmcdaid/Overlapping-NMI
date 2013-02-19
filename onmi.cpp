@@ -331,6 +331,8 @@ double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const G
 		;
 }
 
+typedef long long int lli;
+
 pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	set<Node> nodes;
 	for(NodeToGroup::const_iterator i = ng1.begin(); i!=ng1.end(); i++) { nodes.insert(i->first); }
@@ -340,13 +342,13 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	for(set<Node>::const_iterator i=nodes.begin(); i!=nodes.end(); i++) { nodesv.push_back(*i); }
 	const int N=nodesv.size();
 
-	map<int,int> A;
+	map<int,lli> A;
 	map< pair<int,int> ,int> B;
-	map<int,int> N_bottom;
-	map<int,int> N_side;
+	map<int,lli> N_bottom;
+	map<int,lli> N_side;
 
 	int minJK = 0;
-	long int sumOfSquares = 0;
+	lli sumOfSquares = 0;
 	for(int n=0; n<N; n++) {
 		for(int m=0; m<n; m++) {
 			// PP2(n,m);
@@ -380,7 +382,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	}
 	v1(minJK);
 
-	long int bigN = 0;
+	lli bigN = 0;
 	forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
 		bigN += Nj.second;
 	}
@@ -407,15 +409,17 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 
 	double L2norm = sqrt(sumOfSquares);
 
-	long int numerator = 0;
+	lli numerator = 0;
 	for(int j=0; j<=minJK; j++) {
 		numerator += bigN * A[j];
 		numerator -= N_bottom[j] * N_side[j];
+		assert(numerator >= 0);
 	}
-	long int denominator = 0;
+	lli denominator = 0;
 	denominator += bigN * bigN;
 	for(int j=0; j<=minJK; j++) {
 		denominator -= N_bottom[j] * N_side[j];
+		assert(denominator >= 0);
 	}
 	v1(numerator);
 	v1(denominator);
