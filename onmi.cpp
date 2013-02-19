@@ -55,7 +55,7 @@ using namespace std;
 struct MissingFile {};
 struct EmptyFile {};
 
-void oNMI(const char * file1, const char * file2);
+void oNMI(const char * file1, const char * file2, const bool do_omega_also);
 
 static int global_verbose_flag = 0;
 
@@ -74,7 +74,7 @@ int main(int argc, char ** argv) {
 	}
 	const char *file1 = args_info.inputs[0];
 	const char *file2 = args_info.inputs[1];
-	oNMI(file1, file2);
+	oNMI(file1, file2, args_info.omega_flag);
 }
 
 typedef std::string Node;
@@ -427,7 +427,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	return make_pair(O,L2norm);
 }
 
-void oNMI(const char * file1, const char * file2) {
+void oNMI(const char * file1, const char * file2, const bool do_omega_also) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
 	v1(g1.size());
@@ -461,15 +461,13 @@ void oNMI(const char * file1, const char * file2) {
 		cout << "Here:" << endl;
 	}
 	const double LFKnmi_ = LFKNMI(om, omFlipped, g1, g2);
-#ifdef DO_OMEGA_ALSO // it's slow though!
-	pair<double,double> OmegaAndL2Norm = omega(n2g1, n2g2);
-#endif
-#ifdef DO_OMEGA_ALSO
-	const double Omega = OmegaAndL2Norm.first;
-	const double L2norm = OmegaAndL2Norm.second;
-	cout << "Datum:\t"; PP(Omega);
-	cout << "Datum:\t"; PP(L2norm);
-#endif
+	if(do_omega_also) {
+		pair<double,double> OmegaAndL2Norm = omega(n2g1, n2g2);
+		const double Omega = OmegaAndL2Norm.first;
+		const double L2norm = OmegaAndL2Norm.second;
+		cout << "Datum:\t"; PP(Omega);
+		cout << "Datum:\t"; PP(L2norm);
+	}
 	cout << "NMI<Max>:\t"; cout << aaronNMI<Max>(om, omFlipped, g1, g2) << endl;
 	cout << "Other measures:" << endl;
 	cout << "  lfkNMI:\t"; cout << LFKnmi_ << endl;
