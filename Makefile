@@ -23,7 +23,7 @@ CXXFLAGS:=       \
           -Wuninitialized   \
           -Wunused-parameter    \
           -Wunused             \
-          -Wall -Wformat -Werror 
+          -Wall -Wformat #-Werror
 
 
 #CXXFLAGS= ${BITS}     -g
