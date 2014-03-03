@@ -281,7 +281,7 @@ double VI_oneSide (const OverlapMatrix &om, const Grouping &g1, const Grouping &
 					PP(unnorm - H_X);
 				}
 				assert(norm <= 1.01);
-				assert(norm >= 0.0);
+				assert(norm >= -0.01);
 				total += norm;
 			}
 		} else {
