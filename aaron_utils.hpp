@@ -38,9 +38,8 @@ std::string thousandsSeparated(uint64 x);
 #define PPhex(x) cout << #x << ":" << std::hex << std::setw(20) << x << std::dec << endl
 #define Print(x)  P("%s", show(x).c_str())
 #define Printn(x) P("%s\n", show(x).c_str())
-#define v1(...) do { if(global_verbose_flag)  PP(__VA_ARGS__); } while(0)
-#define v2(...) do { if(global_verbose_flag) PP2(__VA_ARGS__); } while(0)
-#define v3(...) do { if(global_verbose_flag) PP3(__VA_ARGS__); } while(0)
+#define PP1_v(...) do { if(global_verbose_flag)  PP(__VA_ARGS__); } while(0)
+#define PP2_v(...) do { if(global_verbose_flag) PP2(__VA_ARGS__); } while(0)
 
 #define unless(x) if(!(x))
 

@@ -383,12 +383,12 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 
 
 			{ // Latouches's L2 norm
-				// v2(a-c, (a-c)*(a-c));
+				// PP2_v(a-c, (a-c)*(a-c));
 				sumOfSquares += (a-c)*(a-c);
 			}
 		}
 	}
-	v1(minJK);
+	PP1_v(minJK);
 
 	lli bigN = 0;
 	for(const pair<int,int> &Nj: N_bottom) {
@@ -428,8 +428,8 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 		denominator -= N_bottom[j] * N_side[j];
 		assert(denominator >= 0);
 	}
-	v1(numerator);
-	v1(denominator);
+	PP1_v(numerator);
+	PP1_v(denominator);
 	double O = double(numerator) / double(denominator);
 	return make_pair(O,L2norm);
 }
@@ -437,14 +437,14 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 void oNMI(const char * file1, const char * file2, const bool do_omega_also) {
 	Grouping g1 = fileToSet(file1);
 	Grouping g2 = fileToSet(file2);
-	v1(g1.size());
-	v1(g2.size());
+	PP1_v(g1.size());
+	PP1_v(g2.size());
 	unless(g1.size() > 0) throw EmptyFile();
 	unless(g2.size() > 0) throw EmptyFile();
 	NodeToGroup n2g1 = nodeToGroup(g1);
 	NodeToGroup n2g2 = nodeToGroup(g2);
-	v1(n2g1.size());
-	v1(n2g2.size());
+	PP1_v(n2g1.size());
+	PP1_v(n2g2.size());
 	const OverlapMatrix om = overlapMatrix(n2g1, n2g2);
 
 	OverlapMatrix omFlipped;
