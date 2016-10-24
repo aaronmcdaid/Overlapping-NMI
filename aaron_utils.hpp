@@ -60,28 +60,8 @@ std::string show(int64 x);
 std::string show(const char * x);
 std::string show(const std::string &x);
 
-class runningAverage {
-	int64 total;
-	int64 n;
-public:
-	runningAverage();
-	void operator() (int64 i);
-	std::string operator() (void) const;
-} ;
 #define unless(x) if(!(x))
 
-template <class T1, class T2>
-struct RefPair {
-	T1& e1;
-	T2& e2;
-	RefPair(T1 &in1, T2 &in2) : e1(in1), e2(in2) { }
-	void operator= (pair<T1, T2> source) { e1 = source.first; e2 = source.second; }
-};
-template <class T1, class T2>
-RefPair<T1, T2> make_refpair(T1 &e1, T2 &e2) {
-	RefPair<T2, T2> rf(e1,e2);
-	return rf;
-}
 
 struct DummyOutputStream {
 	DummyOutputStream& operator << (int);
@@ -89,146 +69,15 @@ struct DummyOutputStream {
 };
 extern DummyOutputStream dummyOutputStream;
 
-struct StopWatch { // TODO: put the stopWatch in another file?
-	struct timeval tp;
-	struct timeval last_laptime;
-	StopWatch() {
-		gettimeofday(&tp, NULL);
-		last_laptime = tp;
-	}
-	void laptime(void) { laptime(""); }
-	void laptime(const std::string &tag) {
-		struct timeval tp_new;
-		gettimeofday(&tp_new, NULL);
-		double sinceStart   = (double)(tp_new.tv_sec - tp.tv_sec) + (double)(tp_new.tv_usec - tp.tv_usec) / 1000000;
-		double sinceLastLap = (double)(tp_new.tv_sec - last_laptime.tv_sec) + (double)(tp_new.tv_usec - last_laptime.tv_usec) / 1000000;
-			Pn("                                              <StopWatch> %.3f (+%.3f) %s", sinceStart, sinceLastLap, tag.c_str());
-		last_laptime = tp_new;
-	}
-};
-
 #define assertEQint(x,y) do { unless((x)==(y)) { PP(x); PP(y); } assert((x)==(y)); } while(0)
 #define DYINGWORDS(x) for (int klsdjfslkfj = (x) ? 0 : 1; klsdjfslkfj!=0; klsdjfslkfj--, ({ assert (x); }) )
 #define UNUSED __attribute__ ((__unused__))
-
-template<class K, class V> class maxOnlymap : public map<K, V> {
-public:
-	pair<typename map<K,V>::iterator,bool> insert ( const typename map<K,V>::value_type& x ) {
-		if(this->empty()) {
-			return map<K,V>::insert(x);
-		}
-		if(x.first <= this->begin()->first ) {
-			return make_pair(this->end(), true); // ignore it.
-		}
-		this->clear();
-		return map<K,V>::insert(x);
-	}
-};
-
-struct Timer {
-	struct timeval start;
-	std::string _s;
-	Timer() {
-		gettimeofday(&start, NULL);
-	}
-	Timer(const std::string &s): _s(s) {
-		gettimeofday(&start, NULL);
-	}
-	double age() const {
-		struct timeval end;
-		gettimeofday(&end, NULL);
-		double diff = end.tv_sec - start.tv_sec + 1e-6 * (end.tv_usec - start.tv_usec);
-		return diff;
-	}
-	~Timer() {
-		double diff = this->age();
-		P("                                                                          "); cout << "Timer " << _s << ": " << diff << " s" << endl;
-	}
-};
-#define uset std::unordered_set
-#define umap std::unordered_map
 
 namespace amd {
 
 istream *zcatThis(const char *gzippedFile);
 bool fileExists(const char *);
 
-struct DebugCounter {
-	int count;
-	int freq;
-	std::string s;
-	DebugCounter(const std::string &_s, int _freq = 1000);
-	void operator++ ();
-};
-
-template<class T>
-void Histogram(T r) {
-	typedef typename remove_const<typename remove_reference<typename T::value_type>::type>::type V;
-	map<V, int> freqs;
-	size_t total = 0;
-	while(!r.empty()) {
-		freqs[r.front()]++;
-		r.popFront();
-		++total;
-	}
-	cout << endl << "\t x\t freq" << endl;
-	for (auto const &p: mk_range(freqs)) {
-		cout << "\t" << p.first << "\t" << p.second  << endl;
-	}
-	cout << "\t total\t " << total << endl;
-	cout << endl;
-}
-template<class T1, class T2>
-void TwoWayTable(T1 r1, T2 r2) {
-	typedef typename remove_const<typename remove_reference<typename T1::value_type>::type>::type V1;
-	typedef typename remove_const<typename remove_reference<typename T2::value_type>::type>::type V2;
-	map<V1, int> xs;
-	map<V2, int> ys;
-	map<pair<V1,V2>, int> freqs;
-	size_t total = 0;
-	while(!r1.empty() && !r2.empty()) {
-		freqs[make_pair(r1.front(), r2.front())]++;
-		xs[r1.front()]++;
-		ys[r2.front()]++;
-		r1.popFront();
-		r2.popFront();
-		++total;
-	}
-	for(auto const & y : ys ) {
-		for(auto const & x : xs ) {
-			cout << setw(10) << freqs[make_pair(x.first,y.first)];
-			cout << " " << x.first << "," << setw(2) << y.first;
-		}
-		cout << " sub:" << setw(10) << y.second << endl;
-	}
-	for(auto const & x : xs ) {
-			cout << setw(10) << x.second;
-			cout << "  @ " << x.first;
-	}
-	cout << "\t total\t " << total << endl;
-	cout << endl;
-
-	for(auto const & y : ys ) {
-		for(auto const & x : xs ) {
-			double expected = double(x.second) / double (total) * double(y.second);// / double (total)
-			cout << setw(10) << freqs[make_pair(x.first,y.first)] / expected;
-			cout << " " << x.first << "," << setw(2) << y.first;
-		}
-		cout << "   sub:" << setw(10) << double(y.second)/total << endl;
-	}
-	for(auto const & x : xs ) {
-			cout << setw(10) << double(x.second)/total;
-			cout << "  @ " << x.first;
-	}
-
-	cout << endl;
-	cout << endl;
-}
-
-template<class C>
-typename C::value_type constAt(const C &c, int i) {
-	return c.at(i);
-}
 
 struct NotImplemented {
 };

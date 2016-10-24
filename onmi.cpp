@@ -27,12 +27,8 @@
 #include <algorithm>
 #include <vector>
 #include <set>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-
-namespace extra = std::tr1;
-// namespace extra = boost;
-
+#include <unordered_map>
+#include <unordered_set>
 
 #include "aaron_utils.hpp"
 
@@ -80,7 +76,7 @@ int main(int argc, char ** argv) {
 typedef std::string Node;
 typedef std::vector< std::set< Node > > Grouping;
 struct NodeToGroup : public
-		     extra::unordered_map< Node, set<int> >
+		     unordered_map< Node, set<int> >
 {
 	int sharedGroups(const Node n_, const Node m_) const {
 		// PP2(n_,m_);
@@ -158,7 +154,7 @@ NodeToGroup nodeToGroup(const Grouping &g) {
 
 const OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	OverlapMatrix om;
-	extra::unordered_set< Node > nodes;
+	unordered_set< Node > nodes;
 	for(const NodeToGroup::value_type &n : ng2) {
 		nodes.insert(n.first);
 	}
