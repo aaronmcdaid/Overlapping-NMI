@@ -335,6 +335,22 @@ double aaronNMI(const OverlapMatrix &om, const OverlapMatrix &omFlipped, const G
 typedef long long int lli;
 
 pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
+	// To understand this implement this implementation, look at the formulation
+	// on page 6 of this: http://www.aclweb.org/anthology/W12-2602
+	// That defines:
+	//
+	//                      Obs(s1,s2) - Exp(s1,s2)
+	//      Omega(s1,s2) =  -----------------------
+	//                               1 - Exp(s1,s2)
+	//
+	// The only 'trick' I have used is to multiply above and below the line by N^2
+	//
+	// Finally, note that the Omega index can be negative.
+	// Obs and Exp are each guaranteed to be between 0 and 1 (inclusive).
+	// Therefore, the maximum Omega index is 1.0.
+	// I think the minimum is -1.0, although not certain that can be attained.
+
+	// First step is to identify all the distinct nodes
 	set<Node> nodes;
 	for(NodeToGroup::const_iterator i = ng1.begin(); i!=ng1.end(); i++) { nodes.insert(i->first); }
 	for(NodeToGroup::const_iterator i = ng2.begin(); i!=ng2.end(); i++) { nodes.insert(i->first); }
@@ -343,9 +359,10 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	for(set<Node>::const_iterator i=nodes.begin(); i!=nodes.end(); i++) { nodesv.push_back(*i); }
 	const int N=nodesv.size();
 
-	map<int,lli> A;
-	map<int,lli> N_bottom;
-	map<int,lli> N_side;
+	// Now to start populating the relevant statistics
+	map<int,lli> A; // number of pairs of nodes sharing this number of clusters, where both covers agree on this number
+	map<int,lli> N_bottom; // necessary for computing the expected number. For one cover, the distribution of the shared-cluster-count.
+	map<int,lli> N_side;   // necessary for computing the expected number. For the other cover, the distribution of the shared-cluster-count.
 
 	int minJK = 0;
 	lli sumOfSquares = 0;
@@ -356,11 +373,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 			const Node m_ = nodesv.at(m);
 			// PP2(n_,m_);
 			const int a = ng1.sharedGroups(n_,m_);
-			// const int b = ng1.sharedGroups(m_,n_);
 			const int c = ng2.sharedGroups(n_,m_);
-			// const int d = ng2.sharedGroups(m_,n_);
-			// assert(a==b);
-			// assert(c==d);
 			// PP4(a,b,c,d);
 			// assert(a!=1 || d!=0);
 			if(a==c)
