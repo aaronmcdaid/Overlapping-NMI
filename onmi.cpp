@@ -344,7 +344,6 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	const int N=nodesv.size();
 
 	map<int,lli> A;
-	map< pair<int,int> ,int> B;
 	map<int,lli> N_bottom;
 	map<int,lli> N_side;
 
@@ -366,7 +365,6 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 			// assert(a!=1 || d!=0);
 			if(a==c)
 				A[a]++;
-			B[make_pair(a,c)]++;
 			N_bottom[a]++;
 			N_side  [c]++;
 			if(minJK < a)
