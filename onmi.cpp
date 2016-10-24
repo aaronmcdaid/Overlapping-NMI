@@ -17,8 +17,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <getopt.h>
-#include <math.h>
-#include <limits.h>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -34,9 +33,6 @@
 #include "aaron_utils.hpp"
 
 #include "cmdline.h"
-
-
-#define DEBUGBYDEFAULT
 
 
 using namespace std;
@@ -234,8 +230,8 @@ double HX_given_BestY (const OverlapMatrix &om, const Grouping &g1, const Groupi
 	// we're looking for the bits to encode X_realxId given all of Y
 	const int sizeOfXComm = g2.at(realxId).size();
 	double bestSoFar = H(sizeOfXComm,om.N) + H(om.N-sizeOfXComm,om.N);
-	std::map< pair<int,int> ,int >::const_iterator            i = om.om.lower_bound(make_pair(realxId, INT_MIN));
-	std::map< pair<int,int> ,int >::const_iterator   endOfRange = om.om.lower_bound(make_pair(realxId+1, INT_MIN));
+	std::map< pair<int,int> ,int >::const_iterator            i = om.om.lower_bound(make_pair(realxId  , std::numeric_limits<int>::min()));
+	std::map< pair<int,int> ,int >::const_iterator   endOfRange = om.om.lower_bound(make_pair(realxId+1, std::numeric_limits<int>::min()));
 	for(; i != endOfRange; ++           i)
 	{
 		int xId =  i->first.first;
