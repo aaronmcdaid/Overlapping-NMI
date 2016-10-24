@@ -24,6 +24,7 @@ CXXFLAGS:=       \
           -Wunused-parameter    \
           -Wunused             \
           -Wall -Wformat #-Werror
+CXXFLAGS += -Wextra
 
 
 #CXXFLAGS= ${BITS}     -g
