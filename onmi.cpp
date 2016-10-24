@@ -125,10 +125,11 @@ Grouping fileToSet(const char * file) {
 	std::ifstream f(file);
 	unless(f.is_open())
 		throw  MissingFile();
-	forEach(const std::string &line, amd::rangeOverStream(f)) {
+	for(std::string line; getline(f, line); ) {
 		Grouping::value_type s;
 		istringstream fields(line);
-		forEach(const std::string &field, amd::rangeOverStream(fields, "\t ")) {
+		//forEach(const std::string &field, amd::rangeOverStream(fields, "\t ")) {
+		for(std::string field; fields >> field; ) {
 			if(field.length() == 0) {
 				cerr << "Warning: two consecutive tabs, or tab at the start of a line. Ignoring empty fields like this" << endl;
 			} else {
@@ -147,7 +148,7 @@ NodeToGroup nodeToGroup(const Grouping &g) {
 	NodeToGroup n2g;
 	for(int grpId = 0; grpId < (int)g.size(); grpId++) {
 		const Grouping::value_type &grp = g.at(grpId);
-		forEach(const Node &n, amd::mk_range(grp)) {
+		for(const Node &n : grp) {
 			n2g[n].insert(grpId);
 		}
 	}
@@ -158,15 +159,15 @@ NodeToGroup nodeToGroup(const Grouping &g) {
 const OverlapMatrix overlapMatrix(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	OverlapMatrix om;
 	extra::unordered_set< Node > nodes;
-	forEach(const NodeToGroup::value_type &n, amd::mk_range(ng2)) {
+	for(const NodeToGroup::value_type &n : ng2) {
 		nodes.insert(n.first);
 	}
-	forEach(const NodeToGroup::value_type &n, amd::mk_range(ng1)) {
+	for(const NodeToGroup::value_type &n: ng1) {
 		nodes.insert(n.first);
 	}
-	forEach(const Node &n, amd::mk_range(nodes)) {
-		if(ng1.count(n)) forEach(const int g1, amd::mk_range(ng1.find(n)->second)) {
-			if(ng2.count(n)) forEach(const int g2, amd::mk_range(ng2.find(n)->second)) {
+	for(auto const &n: nodes) {
+		if(ng1.count(n)) for(const int g1: ng1.find(n)->second) {
+			if(ng2.count(n)) for(const int g2: ng2.find(n)->second) {
 				om.om[make_pair(g1,g2)] ++;
 			}
 		}
@@ -383,7 +384,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 	v1(minJK);
 
 	lli bigN = 0;
-	forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_bottom)) {
+	for(const pair<int,int> &Nj: N_bottom) {
 		bigN += Nj.second;
 	}
 	{ // verification
@@ -399,7 +400,7 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 		}
 		*/
 		int verifyNumPairs3 = 0;
-		forEach(const typeof(pair<int,int>) &Nj, amd::mk_range(N_side  )) {
+		for(const pair<int,int> &Nj: N_side  ) {
 			// PP2(Nj.first, Nj.second);
 			verifyNumPairs3 += Nj.second;
 		}
@@ -441,7 +442,7 @@ void oNMI(const char * file1, const char * file2, const bool do_omega_also) {
 
 	OverlapMatrix omFlipped;
 	omFlipped.N = om.N;
-	forEach(typeof(pair< pair<int,int> ,int>) p, amd::mk_range(om.om)) {
+	for(pair< pair<int,int> ,int> p: om.om) {
 		swap(p.first.first, p.first.second);
 		bool wasInserted = omFlipped.om.insert(p).second;
 		assert(wasInserted);
