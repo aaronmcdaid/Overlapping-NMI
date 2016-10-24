@@ -41,15 +41,6 @@ std::string thousandsSeparated(uint64 x);
 #define v1(...) do { if(global_verbose_flag)  PP(__VA_ARGS__); } while(0)
 #define v2(...) do { if(global_verbose_flag) PP2(__VA_ARGS__); } while(0)
 #define v3(...) do { if(global_verbose_flag) PP3(__VA_ARGS__); } while(0)
-enum {
-	EXIT_UNSPECIFIED=1  // other (unspecified) error. Try to avoid using this
-	, EXIT_FILEOPEN     // child process failed because it couldn't open the requested file
-	, EXIT_CHILD     // other error in the child process, e.g. execl failed
-	};
-#define Die(...) ( ({ Perrorn(__VA_ARGS__); exit(EXIT_UNSPECIFIED); 0; }) )
-#define orDie(x ,errorCond ,msg) ({ typeof(x) y = (x); y!=errorCond || Die(msg); y; })
-#define pipe_orDie(filedes)            orDie(pipe(filedes) ,-1 ,"Couldn't pipe(2)")
-#define fork_orDie()                   orDie(fork()        ,-1 ,"Couldn't fork(2)")
 
 #define unless(x) if(!(x))
 
