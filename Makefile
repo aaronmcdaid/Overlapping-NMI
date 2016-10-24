@@ -31,9 +31,10 @@ LDFLAGS+= -lrt -lm
 CC=g++
 #CXXFLAGS= ${BITS} -O3 -p -pg ${CXXFLAGS} # -DNDEBUG
 CXXFLAGS:= ${BITS} -O3        ${CXXFLAGS} # -DNDEBUG
+CXXFLAGS += -std=c++11
 #CXXFLAGS=              -O2                 
 
-onmi: Range.o onmi.o cmdline.o
+onmi: onmi.o cmdline.o
 
 cmdline.c.FORCE:
 	# remake cmdline.c . But it's OK unless you change the .ggo file. You'll need gengetopt(1) to be able to run this.

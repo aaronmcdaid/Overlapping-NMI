@@ -1,7 +1,6 @@
 #ifndef _AARON_UTILS_H
 #define _AARON_UTILS_H
 
-using namespace std;
 //#include <string>
 #include <iostream>
 #include <iomanip>
@@ -11,7 +10,8 @@ using namespace std;
 #include <sys/time.h>
 #include <map>
 #include <vector>
-#include "Range.hpp"
+
+using namespace std;
 
 typedef long long int64;
 typedef unsigned long long uint64;
@@ -145,8 +145,8 @@ struct Timer {
 		P("                                                                          "); cout << "Timer " << _s << ": " << diff << " s" << endl;
 	}
 };
-#define uset std::tr1::unordered_set
-#define umap std::tr1::unordered_map
+#define uset std::unordered_set
+#define umap std::unordered_map
 
 namespace amd {
 
@@ -163,7 +163,7 @@ struct DebugCounter {
 
 template<class T>
 void Histogram(T r) {
-	typedef typename tr1::remove_const<typename tr1::remove_reference<typename T::value_type>::type>::type V;
+	typedef typename remove_const<typename remove_reference<typename T::value_type>::type>::type V;
 	map<V, int> freqs;
 	size_t total = 0;
 	while(!r.empty()) {
@@ -171,9 +171,8 @@ void Histogram(T r) {
 		r.popFront();
 		++total;
 	}
-	pair<V, int> p;
 	cout << endl << "\t x\t freq" << endl;
-	forEach (p, mk_range(freqs)) {
+	for (auto const &p: mk_range(freqs)) {
 		cout << "\t" << p.first << "\t" << p.second  << endl;
 	}
 	cout << "\t total\t " << total << endl;
@@ -181,8 +180,8 @@ void Histogram(T r) {
 }
 template<class T1, class T2>
 void TwoWayTable(T1 r1, T2 r2) {
-	typedef typename tr1::remove_const<typename tr1::remove_reference<typename T1::value_type>::type>::type V1;
-	typedef typename tr1::remove_const<typename tr1::remove_reference<typename T2::value_type>::type>::type V2;
+	typedef typename remove_const<typename remove_reference<typename T1::value_type>::type>::type V1;
+	typedef typename remove_const<typename remove_reference<typename T2::value_type>::type>::type V2;
 	map<V1, int> xs;
 	map<V2, int> ys;
 	map<pair<V1,V2>, int> freqs;
@@ -195,31 +194,29 @@ void TwoWayTable(T1 r1, T2 r2) {
 		r2.popFront();
 		++total;
 	}
-	pair<V1, int> x;
-	pair<V2, int> y;
-	forEach(y, mk_range(ys)) {
-		forEach(x, mk_range(xs)) {
+	for(auto const & y : ys ) {
+		for(auto const & x : xs ) {
 			cout << setw(10) << freqs[make_pair(x.first,y.first)];
 			cout << " " << x.first << "," << setw(2) << y.first;
 		}
 		cout << " sub:" << setw(10) << y.second << endl;
 	}
-	forEach(x, mk_range(xs)) {
+	for(auto const & x : xs ) {
 			cout << setw(10) << x.second;
 			cout << "  @ " << x.first;
 	}
 	cout << "\t total\t " << total << endl;
 	cout << endl;
 
-	forEach(y, mk_range(ys)) {
-		forEach(x, mk_range(xs)) {
+	for(auto const & y : ys ) {
+		for(auto const & x : xs ) {
 			double expected = double(x.second) / double (total) * double(y.second);// / double (total)
 			cout << setw(10) << freqs[make_pair(x.first,y.first)] / expected;
 			cout << " " << x.first << "," << setw(2) << y.first;
 		}
 		cout << "   sub:" << setw(10) << double(y.second)/total << endl;
 	}
-	forEach(x, mk_range(xs)) {
+	for(auto const & x : xs ) {
 			cout << setw(10) << double(x.second)/total;
 			cout << "  @ " << x.first;
 	}
