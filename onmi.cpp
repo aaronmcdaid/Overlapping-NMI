@@ -411,17 +411,8 @@ pair<double,double> omega(const NodeToGroup &ng1, const NodeToGroup &ng2) {
 
 	lli numerator = 0;
 	for(int j=0; j<=minJK; j++) {
-		//PP2(__LINE__, numerator);
-		//PP2(__LINE__, bigN       );
-		//PP2(__LINE__,        A[j]);
-		//PP2(__LINE__, bigN * A[j]);
-		//PP2(__LINE__, N_bottom[j]            );
-		//PP2(__LINE__,               N_side[j]);
-		//PP2(__LINE__, N_bottom[j] * N_side[j]);
-		numerator += bigN * A[j];             // 15,920,000
-		numerator -= N_bottom[j] * N_side[j]; // 73,587,500
-		//PP2(__LINE__, numerator);
-		assert(numerator >= 0);
+		numerator += bigN * A[j];
+		numerator -= N_bottom[j] * N_side[j];
 	}
 	lli denominator = 0;
 	denominator += bigN * bigN;
